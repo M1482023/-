@@ -2,13 +2,6 @@ name: Extract TikTok Cookies
 
 on:
   workflow_dispatch:
-    inputs:
-      username:
-        description: 'TikTok username'
-        required: true
-      password:
-        description: 'TikTok password'
-        required: true
 
 jobs:
   extract-cookies:
