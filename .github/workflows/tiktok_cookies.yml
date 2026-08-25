@@ -28,11 +28,7 @@ jobs:
           python3 << 'PY'
           from selenium import webdriver
           from selenium.webdriver.chrome.options import Options
-          from selenium.webdriver.common.by import By
-          from selenium.webdriver.support.ui import WebDriverWait
-          from selenium.webdriver.support import expected_conditions as EC
           import time
-          import json
 
           options = Options()
           options.add_argument("--headless")
@@ -42,13 +38,15 @@ jobs:
           driver = webdriver.Chrome(options=options)
 
           try:
-              print("Opening TikTok...")
-              driver.get("https://www.tiktok.com/login")
+              print("Opening TikTok homepage...")
+              driver.get("https://www.tiktok.com")
               
-              # כאן תצטרך להוסיף לוגיקה להתחברות
-              # זה יהיה מורכב כי טיקטוק דורש אימות דו-שלבי
+              # המתנה לטעינת הדף
+              time.sleep(5)
               
-              # חילוץ עוגיות
+              print("Extracting basic cookies...")
+              
+              # חילוץ עוגיות בסיסיות
               cookies = driver.get_cookies()
               
               # המרה לפורמט Netscape cookie file
@@ -67,7 +65,8 @@ jobs:
                       
                       f.write(f"{domain}\tTRUE\t{path}\t{secure}\t{expiration}\t{name}\t{value}\n")
               
-              print(f"Extracted {len(cookies)} cookies")
+              print(f"Extracted {len(cookies)} basic cookies")
+              print("Note: These are basic cookies without login. They may not work for downloading private content.")
               
           except Exception as e:
               print(f"Error: {e}")
