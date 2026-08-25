@@ -1,0 +1,82 @@
+name: Extract TikTok Cookies
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: 'TikTok username'
+        required: true
+      password:
+        description: 'TikTok password'
+        required: true
+
+jobs:
+  extract-cookies:
+    runs-on: ubuntu-latest
+    container:
+      image: selenium/standalone-chrome:latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        run: |
+          pip install selenium
+
+      - name: Extract TikTok Cookies
+        run: |
+          python3 << 'PY'
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.support.ui import WebDriverWait
+          from selenium.webdriver.support import expected_conditions as EC
+          import time
+          import json
+
+          options = Options()
+          options.add_argument("--headless")
+          options.add_argument("--no-sandbox")
+          options.add_argument("--disable-dev-shm-usage")
+
+          driver = webdriver.Chrome(options=options)
+
+          try:
+              print("Opening TikTok...")
+              driver.get("https://www.tiktok.com/login")
+              
+              # כאן תצטרך להוסיף לוגיקה להתחברות
+              # זה יהיה מורכב כי טיקטוק דורש אימות דו-שלבי
+              
+              # חילוץ עוגיות
+              cookies = driver.get_cookies()
+              
+              # המרה לפורמט Netscape cookie file
+              with open("tiktok_cookies.txt", "w") as f:
+                  f.write("# Netscape HTTP Cookie File\n")
+                  f.write("# https://curl.haxx.se/rfc/cookie_spec.html\n")
+                  f.write("# This is a generated file! Do not edit.\n\n")
+                  
+                  for cookie in cookies:
+                      domain = cookie.get("domain", "")
+                      path = cookie.get("path", "/")
+                      secure = "TRUE" if cookie.get("secure", False) else "FALSE"
+                      expiration = str(int(cookie.get("expires", 0))) if cookie.get("expires") else "0"
+                      name = cookie.get("name", "")
+                      value = cookie.get("value", "")
+                      
+                      f.write(f"{domain}\tTRUE\t{path}\t{secure}\t{expiration}\t{name}\t{value}\n")
+              
+              print(f"Extracted {len(cookies)} cookies")
+              
+          except Exception as e:
+              print(f"Error: {e}")
+          finally:
+              driver.quit()
+          PY
+
+      - name: Upload cookies artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiktok-cookies
+          path: tiktok_cookies.txt
